@@ -19,6 +19,10 @@ final class UnleashContext implements Context
     /**
      * @var string|null
      */
+    private $environment;
+    /**
+     * @var string|null
+     */
     private $sessionId;
     /**
      * @var array<string, string>
@@ -27,9 +31,10 @@ final class UnleashContext implements Context
     /**
      * @param array<string,string> $customContext
      */
-    public function __construct(?string $currentUserId = null, ?string $ipAddress = null, ?string $sessionId = null, array $customContext = [], ?string $hostname = null)
+    public function __construct(?string $currentUserId = null, ?string $environment = null, ?string $ipAddress = null, ?string $sessionId = null, array $customContext = [], ?string $hostname = null)
     {
         $this->currentUserId = $currentUserId;
+        $this->environment = $environment;
         $this->ipAddress = $ipAddress;
         $this->sessionId = $sessionId;
         $this->customContext = $customContext;
@@ -38,6 +43,11 @@ final class UnleashContext implements Context
     public function getCurrentUserId(): ?string
     {
         return $this->currentUserId;
+    }
+
+    public function getEnvironment(): ?string
+    {
+        return $this->environment;
     }
 
     public function getIpAddress(): ?string
@@ -103,6 +113,13 @@ final class UnleashContext implements Context
         return $this;
     }
 
+    public function setEnvironment(?string $environment): \Unleash\Client\Configuration\Context
+    {
+        $this->environment = $environment;
+
+        return $this;
+    }
+
     public function getHostname(): ?string
     {
         return $this->findContextValue('hostname') ?? (gethostname() ?: null);
@@ -143,6 +160,8 @@ final class UnleashContext implements Context
                 return $this->getSessionId();
             case ContextField::IP_ADDRESS:
                 return $this->getIpAddress();
+            case ContextField::ENVIRONMENT:
+                return $this->getEnvironment();
             default:
                 return $this->customContext[$fieldName] ?? null;
         }

@@ -12,6 +12,8 @@ interface Context
 
     public function getIpAddress(): ?string;
 
+    public function getEnvironment(): ?string;
+
     public function getSessionId(): ?string;
 
     public function getCustomProperty(string $name): string;
@@ -25,6 +27,8 @@ interface Context
     public function setCurrentUserId(?string $currentUserId): self;
 
     public function setIpAddress(?string $ipAddress): self;
+
+    public function setEnvironment(?string $environment): self;
 
     public function setSessionId(?string $sessionId): self;
 

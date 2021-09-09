@@ -5,6 +5,7 @@ namespace Unleash\Client;
 use Unleash\Client\Client\RegistrationService;
 use Unleash\Client\Configuration\Context;
 use Unleash\Client\Configuration\UnleashConfiguration;
+use Unleash\Client\Configuration\UnleashContext;
 use Unleash\Client\DTO\Strategy;
 use Unleash\Client\DTO\Variant;
 use Unleash\Client\Metrics\MetricsHandler;
@@ -53,9 +54,11 @@ final class DefaultUnleash implements Unleash
             $this->register();
         }
     }
+
     public function isEnabled(string $featureName, ?Context $context = null, bool $default = false): bool
     {
-        $context = $context ?? $this->configuration->getContextProvider()->getContext();
+        $defaultContext = $this->configuration->getContextProvider()->getContext();
+        $context = $context ? self::mergeContext($defaultContext, $context) : $defaultContext;
 
         $feature = $this->repository->findFeature($featureName);
         if ($feature === null) {
@@ -133,5 +136,21 @@ final class DefaultUnleash implements Unleash
         }
 
         return $handlers;
+    }
+
+    private static function mergeContext(Context $context1, Context $context2): Context
+    {
+        $class = new \ReflectionClass(UnleashContext::class);
+        $classProperties = $class->getProperties();
+
+        foreach ($classProperties as $classProperty) {
+            $classProperty->setAccessible(true);
+            $value = $classProperty->getValue($context2);
+            if ($value) {
+                $classProperty->setValue($context1, $classProperty->getValue($context2));
+            }
+        }
+
+        return $context1;
     }
 }
